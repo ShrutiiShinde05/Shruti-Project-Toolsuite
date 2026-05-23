@@ -9,45 +9,66 @@ const status = document.getElementById('status');
 
 shortenBtn.onclick = async () => {
     const url = longUrlInput.value.trim();
-    
-    if (!url) return notify.info("Please paste a URL first.");
-    if (!url.startsWith('http')) return notify.error("URL must start with http:// or https://");
+
+    if (!url) {
+        notify.info("Please paste a URL first.");
+        return;
+    }
+
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        notify.error("URL must start with http:// or https://");
+        return;
+    }
 
     status.textContent = "Shortening... please wait.";
     shortenBtn.disabled = true;
     resultContainer.style.display = "none";
 
     try {
-        // Use an alternative public proxy if corsproxy.io is failing
         const apiUrl = `https://is.gd/create.php?format=json&url=${encodeURIComponent(url)}`;
-        const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(apiUrl)}`;
-        
-        const response = await fetch(proxyUrl);
-        
-        if (!response.ok) throw new Error("Proxy server error");
+        const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(apiUrl)}`;
 
-        const wrapper = await response.json();
-        // allorigins wraps the response in a 'contents' string
-        const data = JSON.parse(wrapper.contents);
+        const response = await fetch(proxyUrl);
+
+        if (!response.ok) {
+            throw new Error(`HTTP Error: ${response.status}`);
+        }
+
+        const data = await response.json();
 
         if (data.shorturl) {
             shortUrlDiv.textContent = data.shorturl;
             resultContainer.style.display = "block";
             status.textContent = "Success!";
         } else {
-            status.textContent = "Error: " + (data.errormessage || "Service unavailable.");
+            status.textContent =
+                "Error: " + (data.errormessage || "Could not shorten URL.");
         }
+
     } catch (err) {
-        status.textContent = "The service is busy. Please try again in a few seconds.";
         console.error("Fetch Error:", err);
+
+        status.textContent =
+            "The service is busy. Please try again in a few seconds.";
+
+        notify.error("Failed to connect to shortening service.");
     } finally {
         shortenBtn.disabled = false;
     }
 };
 
-copyBtn.onclick = () => {
-    navigator.clipboard.writeText(shortUrlDiv.textContent);
-    const originalText = copyBtn.textContent;
-    copyBtn.textContent = "COPIED!";
-    setTimeout(() => copyBtn.textContent = originalText, 2000);
+copyBtn.onclick = async () => {
+    try {
+        await navigator.clipboard.writeText(shortUrlDiv.textContent);
+
+        const originalText = copyBtn.textContent;
+        copyBtn.textContent = "COPIED!";
+
+        setTimeout(() => {
+            copyBtn.textContent = originalText;
+        }, 2000);
+
+    } catch {
+        notify.error("Clipboard access failed.");
+    }
 };
