@@ -15,14 +15,16 @@ Type on the **left**, see the result on the **right**.
 - [x] Minimalist
 
 > "Simplicity is the ultimate sophistication."
-`
+`;
 
-function init(){
+function init() {
   input.value = localStorage.getItem('toolsuite-md-draft') || defaultText;
+
   updatePreview();
+  autoResizeTextarea();
 }
 
-function updatePreview(){
+function updatePreview() {
   const raw = input.value;
 
   preview.innerHTML = marked.parse(raw);
@@ -30,31 +32,67 @@ function updatePreview(){
   localStorage.setItem('toolsuite-md-draft', raw);
 }
 
-input.addEventListener('input', updatePreview);
+function autoResizeTextarea() {
+  input.style.height = 'auto';
+
+  const parentHeight = input.parentElement.clientHeight;
+  const labelBarHeight = input.parentElement.querySelector('.label-bar').offsetHeight;
+
+  input.style.height = `${parentHeight - labelBarHeight}px`;
+}
+
+input.addEventListener('input', () => {
+  updatePreview();
+  autoResizeTextarea();
+});
+
+window.addEventListener('resize', autoResizeTextarea);
 
 clearBtn.addEventListener('click', () => {
-  if(confirm("Clear all text?")){
+  if (confirm('Clear all text?')) {
     input.value = '';
+
     updatePreview();
+    autoResizeTextarea();
   }
 });
 
-copyHtmlBtn.addEventListener('click', () => {
-  navigator.clipboard.writeText(preview.innerHTML);
-  const originalText = copyHtmlBtn.innerText;
-  copyHtmlBtn.innerText = "COPIED!";
-  setTimeout(() => copyHtmlBtn.innerText = originalText, 2000);
-})
+copyHtmlBtn.addEventListener('click', async () => {
+  try {
+    await navigator.clipboard.writeText(preview.innerHTML);
+
+    const originalText = copyHtmlBtn.innerText;
+
+    copyHtmlBtn.innerText = 'COPIED!';
+
+    setTimeout(() => {
+      copyHtmlBtn.innerText = originalText;
+    }, 2000);
+
+  } catch (err) {
+    alert('Failed to copy HTML.');
+  }
+});
 
 downloadBtn.addEventListener('click', () => {
-  const blob = new Blob([input.value], {type: 'text/markdown'});
+  const blob = new Blob([input.value], {
+    type: 'text/markdown'
+  });
+
   const url = URL.createObjectURL(blob);
+
   const a = document.createElement('a');
+
   a.href = url;
   a.download = 'document.md';
+
+  document.body.appendChild(a);
+
   a.click();
+
+  document.body.removeChild(a);
+
   URL.revokeObjectURL(url);
-})
+});
 
 init();
-
