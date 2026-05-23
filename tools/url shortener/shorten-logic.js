@@ -25,16 +25,32 @@ shortenBtn.onclick = async () => {
     resultContainer.style.display = "none";
 
     try {
-        const apiUrl = `https://is.gd/create.php?format=json&url=${encodeURIComponent(url)}`;
-        const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(apiUrl)}`;
+        const apiUrl =
+            `https://is.gd/create.php?format=json&url=${encodeURIComponent(url)}`;
+
+        const proxyUrl =
+            `https://api.allorigins.win/raw?url=${encodeURIComponent(apiUrl)}`;
 
         const response = await fetch(proxyUrl);
 
         if (!response.ok) {
-            throw new Error(`HTTP Error: ${response.status}`);
+            throw new Error(`HTTP ${response.status}`);
         }
 
-        const data = await response.json();
+        // Read as TEXT first
+        const text = await response.text();
+
+        // Detect proxy failure messages
+        if (
+            text.startsWith('Error') ||
+            text.startsWith('<!DOCTYPE html') ||
+            text.startsWith('<html')
+        ) {
+            throw new Error("Proxy returned invalid response");
+        }
+
+        // Convert to JSON safely
+        const data = JSON.parse(text);
 
         if (data.shorturl) {
             shortUrlDiv.textContent = data.shorturl;
@@ -49,9 +65,9 @@ shortenBtn.onclick = async () => {
         console.error("Fetch Error:", err);
 
         status.textContent =
-            "The service is busy. Please try again in a few seconds.";
+            "The shortening service is temporarily unavailable.";
 
-        notify.error("Failed to connect to shortening service.");
+        notify.error("Failed to shorten URL.");
     } finally {
         shortenBtn.disabled = false;
     }
