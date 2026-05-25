@@ -107,8 +107,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function clearOutputs() {
-        headerOut.innerHTML = '<span style="color:#666">// Waiting for input...</span>';
-        payloadOut.innerHTML = '<span style="color:#666">// Waiting for input...</span>';
+        headerOut.innerHTML = '<span style="color:#ff0000">// Waiting for input...</span>';
+        payloadOut.innerHTML = '<span style="color:#ff0000">// Waiting for input...</span>';
         metaOut.style.display = 'none';
     }
 });

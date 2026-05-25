@@ -9,29 +9,72 @@
     <script src="../../assets/js/notifications.js" defer></script>
     <style>
         :root {
-            --bg-color: #1e1e1e;
-            --card-bg: #2d2d2d;
-            --text-color: #e0e0e0;
+            --bg: #ffffff;
+            --text: #000000;
+            --border: #000000;
+            --card-hover: #000000;
+            --tag-bg: #f0f0f0;
             --accent-color: #007acc;
             --key-color: #9cdcfe;
             --string-color: #ce9178;
             --number-color: #b5cea8;
             --bool-color: #569cd6;
+            --muted: #666666;
+            --meta-tag-bg: #e8e8e8;
+            --meta-value: #555555;
+        }
+
+        body.dark-mode {
+            --bg: #1b1a1a;
+            --text: #f0f0f0;
+            --border: #f0f0f0;
+            --card-hover: #f0f0f0;
+            --tag-bg: #333333;
+            --muted: #aaaaaa;
+            --meta-tag-bg: #3c3c3c;
+            --meta-value: #cccccc;
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            margin: 0;
-            padding: 20px;
+            font-family: 'Courier New', Courier, monospace;
+            background-color: var(--bg);
+            color: var(--text);
             display: flex;
             flex-direction: column;
             gap: 20px;
+            line-height: 1.7;
+            max-width: 880px;
+            margin: 32px auto;
+            padding: 24px;
+            transition: background-color 0.3s, color 0.3s;
         }
 
-        h1 { margin-bottom: 10px; font-size: 1.5rem; }
-        p.subtitle { color: #888; margin-top: -10px; font-size: 0.9rem; }
+        .page-header {
+            position: relative;
+            border-bottom: 4px solid var(--border);
+            padding-bottom: 16px;
+            margin-bottom: 8px;
+        }
+
+        .dark-mode-toggle {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: var(--text);
+            color: var(--bg);
+            border: 2px solid var(--border);
+            padding: 10px 24px;
+            font-family: inherit;
+            font-weight: 900;
+            cursor: pointer;
+            text-transform: uppercase;
+            box-shadow: 4px 4px 0px var(--border);
+            transition: transform 0.1s;
+        }
+        .dark-mode-toggle:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0px var(--border); }
+
+        h1 { margin-bottom: 10px; font-size: 1.5rem; text-transform: uppercase; }
+        p.subtitle { color: var(--muted); margin-top: -10px; font-size: 0.9rem; }
 
         .container {
             display: grid;
@@ -50,10 +93,10 @@
         textarea {
             width: 100%;
             height: 120px;
-            background-color: var(--card-bg);
-            color: var(--text-color);
-            border: 1px solid #444;
-            border-radius: 6px;
+            background-color: var(--tag-bg);
+            color: var(--text);
+            border: 2px solid var(--border);
+            border-radius: 0;
             padding: 10px;
             font-family: 'Courier New', Courier, monospace;
             font-size: 1rem;
@@ -64,15 +107,15 @@
 
         /* Output Boxes */
         .panel {
-            background-color: var(--card-bg);
-            border-radius: 8px;
+            background-color: var(--tag-bg);
+            border-radius: 0;
             padding: 15px;
-            border: 1px solid #444;
+            border: 2px solid var(--border);
             display: flex;
             flex-direction: column;
         }
 
-        .panel h3 { margin-top: 0; font-size: 1.1rem; border-bottom: 1px solid #444; padding-bottom: 10px; }
+        .panel h3 { margin-top: 0; font-size: 1.1rem; border-bottom: 2px solid var(--border); padding-bottom: 10px; }
 
         pre {
             margin: 0;
@@ -93,19 +136,20 @@
         .meta-info {
             margin-top: 15px;
             padding-top: 15px;
-            border-top: 1px solid #444;
+            border-top: 2px solid var(--border);
             font-size: 0.9rem;
         }
         .meta-tag {
             display: inline-block;
-            background: #3c3c3c;
+            background: var(--meta-tag-bg);
             padding: 4px 8px;
-            border-radius: 4px;
+            border-radius: 0;
+            border: 1px solid var(--border);
             margin-right: 10px;
             margin-bottom: 5px;
-            color: #fff;
+            color: var(--text);
         }
-        .meta-value { color: #aaa; }
+        .meta-value { color: var(--meta-value); }
 
         /* Responsive */
         @media (max-width: 768px) {
@@ -115,10 +159,14 @@
 </head>
 <body>
 
+    <header class="page-header">
+        <button class="dark-mode-toggle" onclick="toggleTheme()" id="themeBtn">DARK MODE</button>
+        <h1>Secure JWT Debugger</h1>
+        <p class="subtitle">Paste your token below. Processing is done 100% offline in your browser.</p>
+    </header>
+
     <div class="container">
         <div class="input-section">
-            <h1>Secure JWT Debugger</h1>
-            <p class="subtitle">Paste your token below. Processing is done 100% offline in your browser.</p>
             <textarea id="jwt-input" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."></textarea>
         </div>
 
@@ -135,5 +183,30 @@
     </div>
 
     <script src="jwt-logic.js"></script>
+    <script>
+function updateThemeButton() {
+    const btn = document.getElementById('themeBtn');
+    if (!btn) return;
+    btn.textContent = document.body.classList.contains('dark-mode') ? 'LIGHT MODE' : 'DARK MODE';
+}
+
+function applyTheme(theme) {
+    if (theme === 'dark') {
+        document.body.classList.add('dark-mode');
+    } else {
+        document.body.classList.remove('dark-mode');
+    }
+    updateThemeButton();
+}
+
+function toggleTheme() {
+    const isDark = document.body.classList.contains('dark-mode');
+    const newTheme = isDark ? 'light' : 'dark';
+    localStorage.setItem('theme', newTheme);
+    applyTheme(newTheme);
+}
+
+applyTheme(localStorage.getItem('theme') || 'light');
+    </script>
 </body>
 </html>
