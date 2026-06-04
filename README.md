@@ -166,25 +166,6 @@ Project-Toolsuite/
 
 ---
 
-# 📸 Screenshots
-
-### Homepage
-
-*Add homepage screenshot here.*
-
-```md
-![Homepage](assets/homepage.png)
-```
-
-### Tools Dashboard
-
-*Add dashboard screenshot here.*
-
-```md
-![Dashboard](assets/dashboard.png)
-```
-
----
 
 # 🤝 Contributing
 
