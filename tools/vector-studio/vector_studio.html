@@ -70,13 +70,13 @@
         <span class="material-icons-outlined" style="color:var(--accent)">polyline</span>
         <h1>Vector Studio</h1>
     </div>
-    <div style="display: flex; gap: 10px;">
+    <div style="display: flex; gap: 10px; align-items: center;">
         <button class="btn" onclick="app.export('png')">EXPORT PNG</button>
         <button class="btn" onclick="app.export('svg')">EXPORT SVG</button>
         <button class="btn" onclick="app.clear()">CLEAR</button>
+        <button class="btn" onclick="toggleTheme()" id="themeBtn">🌙 DARK MODE</button>
     </div>
-
-        <button class="dark-mode-toggle" onclick="toggleTheme()" id="themeBtn">DARK MODE</button></header>
+</header>
 
 <div class="workspace">
     <aside class="toolbar">
